@@ -20,6 +20,32 @@ all_data <- raw_data %>%
   filter(arvore != 14) %>% #Retirando Outlier
   arrange(Alternativa)
 
+names(raw_data)[names(raw_data) == "Alternativa" ] <- "metodo"
+names(raw_data)[names(raw_data) == "metodo" ] <- "Alternativa"
+
+
+          raw_data %>%
+  group_by(metodo, arvore) %>%
+            mutate( # funcao para adicionar novas variaveis
+              AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
+              VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
+            summarise(
+              Alternativa = "Alternativa 2",
+              VCC = mean(VCC, na.rm = T)    ) %>%
+            ungroup %>%
+            spread(metodo, VCC) %>%
+            rename(
+              vol_criterion = Criterion, 
+              vol_cubagem   = Cubagem     ) %>%
+            mutate(er     = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2), 
+                   er_med = mean(er) )
+            
+
+
+          
+
+
+
 # Exportar dados ####
 
 #write.csv(all_data, "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/tab_totaliz.csv")
