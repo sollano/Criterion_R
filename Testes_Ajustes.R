@@ -23,15 +23,15 @@ all_data <- raw_data %>%
 names(raw_data)[names(raw_data) == "Alternativa" ] <- "metodo"
 names(raw_data)[names(raw_data) == "metodo" ] <- "Alternativa"
 
-
+Comp = 0
           raw_data %>%
-  group_by(metodo, arvore) %>%
+            group_by(metodo, arvore) %>%
             mutate( # funcao para adicionar novas variaveis
               AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
               VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
             summarise(
               Alternativa = "Alternativa 2",
-              VCC = mean(VCC, na.rm = T)    ) %>%
+              VCC = sum(VCC, na.rm = T)    ) %>%
             ungroup %>%
             spread(metodo, VCC) %>%
             rename(
@@ -40,7 +40,32 @@ names(raw_data)[names(raw_data) == "metodo" ] <- "Alternativa"
             mutate(er     = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2), 
                    er_med = mean(er) )
             
-
+         
+  Comp = 1         
+            bind_rows( 
+              filter(raw_data, metodo == "Cubagem" & secao <= 1.3),
+              filter(raw_data, metodo == "Criterion" & secao > 1.3) ) %>%
+            arrange(arvore, secao) %>%
+            group_by(arvore) %>%
+            mutate( # funcao para adicionar novas variaveis
+              AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
+              VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
+            summarise(
+              Alternativa   = "Alternativa 3",
+              vol_criterion = sum(VCC, na.rm = T)    ) %>%
+              bind_cols( 
+                raw_data %>%
+                filter(metodo == "Cubagem") %>% 
+                group_by(arvore) %>%
+                mutate( # funcao para adicionar novas variaveis
+                AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
+                VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
+                summarise(vol_cubagem = sum(VCC, na.rm = T) ) %>%
+                  select(-arvore)  
+                                       ) %>%
+              mutate(er     = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2), 
+                     er_med = mean(er) )
+          
 
           
 
