@@ -37,8 +37,7 @@ Comp = 0
             rename(
               vol_criterion = Criterion, 
               vol_cubagem   = Cubagem     ) %>%
-            mutate(er     = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2), 
-                   er_med = mean(er) )
+            mutate(er     = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2) )
             
          
   Comp = 1         
@@ -63,8 +62,7 @@ Comp = 0
                 summarise(vol_cubagem = sum(VCC, na.rm = T) ) %>%
                   select(-arvore)  
                                        ) %>%
-              mutate(er     = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2), 
-                     er_med = mean(er) )
+              mutate(er = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2) )
           
 
           
