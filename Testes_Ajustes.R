@@ -9,16 +9,66 @@ dados_ht <- read.csv("extra_info.csv", sep = ",", dec = ".", header = T)
 
 # Calc vol total pelos métodos: Cubagem,criterion, e composto para limites de 1 a 6 ####
 
-all_data <- raw_data %>%
-  do(CubagemComp(., id = "Alternativa 2",Comp = 0)) %>%
-  do(rbind(.,CubagemComp(raw_data, 1.3, id = "Alternativa 3"),
-             CubagemComp(raw_data, 2.3, id = "Alternativa 4"),
-             CubagemComp(raw_data, 3.3, id = "Alternativa 5"),
-             CubagemComp(raw_data, 4.3, id = "Alternativa 6"),
-             CubagemComp(raw_data, 5.3, id = "Alternativa 7"))) %>%
-  do(merge(., dados_ht, by = "arvore")) %>%
-  filter(arvore != 14) %>% #Retirando Outlier
-  arrange(Alternativa)
+all_data <- bind_rows(CubagemComp(raw_data,Comp=0,id = "Alternativa 2"),
+                      CubagemComp(raw_data, 1.3, id  = "Alternativa 3"),
+                      CubagemComp(raw_data, 2.3, id  = "Alternativa 4"),
+                      CubagemComp(raw_data, 3.3, id  = "Alternativa 5"),
+                      CubagemComp(raw_data, 4.3, id  = "Alternativa 6"),
+                      CubagemComp(raw_data, 5.3, id  = "Alternativa 7")) %>%
+           left_join(dados_ht, by = "arvore") %>%
+           filter(arvore != 14) %>% #Retirando Outlier
+           arrange(Alternativa)
+             
+# demonstracao marcio ####
+
+names(raw_data)[names(raw_data) == "Alternativa" ] <- "metodo"
+names(raw_data)[names(raw_data) == "metodo" ] <- "Alternativa"
+
+Comp = 0
+          raw_data %>%
+            group_by(metodo, arvore) %>%
+            mutate( # funcao para adicionar novas variaveis
+              AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
+              VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
+            summarise(
+              Alternativa = "Alternativa 2",
+              VCC = sum(VCC, na.rm = T)    ) %>%
+            ungroup %>%
+            spread(metodo, VCC) %>%
+            rename(
+              vol_criterion = Criterion, 
+              vol_cubagem   = Cubagem     ) %>%
+            mutate(er     = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2) )
+            
+         
+  Comp = 1         
+            bind_rows( 
+              filter(raw_data, metodo == "Cubagem" & secao <= 1.3),
+              filter(raw_data, metodo == "Criterion" & secao > 1.3) ) %>%
+            arrange(arvore, secao) %>%
+            group_by(arvore) %>%
+            mutate( # funcao para adicionar novas variaveis
+              AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
+              VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
+            summarise(
+              Alternativa   = "Alternativa 3",
+              vol_criterion = sum(VCC, na.rm = T)    ) %>%
+              bind_cols( 
+                raw_data %>%
+                filter(metodo == "Cubagem") %>% 
+                group_by(arvore) %>%
+                mutate( # funcao para adicionar novas variaveis
+                AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
+                VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
+                summarise(vol_cubagem = sum(VCC, na.rm = T) ) %>%
+                  select(-arvore)  
+                                       ) %>%
+              mutate(er = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2) )
+          
+
+          
+
+
 
 # Exportar dados ####
 
