@@ -1,9 +1,11 @@
 
 # Pacotes ####
 
-library(xlsx)
-library(dplyr)
+library(readxl)
+library(broom)
+library(purrr)
 library(tidyr)
+library(dplyr)
 library(grid)
 library(ggplot2)
 library(ggthemes)
@@ -217,7 +219,7 @@ Ajuste_Schummacher <- function(data) {
   return(aux)
   
   }
-  
+
    
 Gt <- function(Y1, Yj, Tabela_Num = 0, alpha = 0.05) {
     n <- length(Y1)
@@ -280,78 +282,60 @@ Gt <- function(Y1, Yj, Tabela_Num = 0, alpha = 0.05) {
     if(Tabela_Num == 0){return(as.data.frame(Tab_Results_graybill))}else(return(as.data.frame(Tab_Results_Num_graybill)))
   }
  
-CubagemComp <- function(Dados, Limite, id = "Criterion_", Comp = 1) {
+CubagemComp <- function(Dados, Limite, id = "Criterion_", Comp = 1)
+{
   
-  require(dplyr)
+  if(!is.null(Dados$Alternativa)){names(Dados)[names(Dados) == "Alternativa" ] <- "metodo"}
   
-  cubagem <- function(aux2, id = "vol_criterion") {
-    AS <- (aux2$dcc ^ 2 * pi) / 40000
-    
-    dataC <- data.frame()
-    
-    for(i in 1:nrow(aux2))
-    {
-      if(is.na(aux2$arvore[i+1]))
-      {
-        aux3 <- NA
-        dataC <- rbind(dataC, aux3)
-      }
-      else
-      {
-        if(aux2$arvore[i] != aux2$arvore [i+1])
-        {
-          aux3 <- NA
-          dataC <- rbind(dataC, aux3)
-        }
-        else
-        {
-          if(aux2$arvore[i] == aux2$arvore[i+1])
-          {
-            aux3 <- ((AS[i] + AS[i+1]) / 2) * (aux2$secao[i+1] - aux2$secao[i])
-            dataC <- rbind(dataC, aux3)
-          }
-        }
-      }
-    }
-    names(dataC) <- c(id)
-    dataCC <- cbind(aux2, dataC)
-    dataCC[is.na(dataCC)] <- 0
-    return(dataCC)
-  }
-  
-  cub <- Dados %>%
-    filter(Alternativa == "Cubagem") %>%
-    do(cubagem(., id = "vol_cubagem")) %>%
-    select(arvore, vol_cubagem) %>% 
-    group_by(arvore) %>% 
-    summarize(vol_cubagem= sum(vol_cubagem))
-  
-  if(Comp == 1){  
-    aux2  <- Dados %>%
-      filter(Alternativa == "Cubagem" & secao <= Limite) %>%
-      do(rbind(.,filter(Dados, Alternativa == "Criterion" & secao > Limite)))
-  }
-  else
+  if(Comp == 0)
   {
-    aux2 <- filter(Dados, Alternativa == "Criterion")
-  }
+    df <- Dados %>%
+      group_by(metodo, arvore) %>%
+      mutate( # funcao para adicionar novas variaveis
+        AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
+        VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
+      summarise(
+        Alternativa = id,
+        VCC = sum(VCC, na.rm = T)    ) %>%
+      ungroup %>%
+      spread(metodo, VCC) %>%
+      rename(
+        vol_criterion = Criterion, 
+        vol_cubagem   = Cubagem     ) %>%
+      mutate(er     = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2) )
+    
+  }  
   
-  crit <- aux2 %>%
-    arrange(arvore, secao)%>%
-    do(cubagem(.)) %>%
-    select(arvore, vol_criterion) %>% 
-    group_by(arvore) %>% 
-    summarize(vol_criterion = sum(vol_criterion)) %>%
-    mutate(Alternativa = rep(id,length(arvore)))%>%
-    select(-arvore) %>%
-    do(cbind(cub,.)) %>%
-    mutate(er = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2), er_med = mean(er)) %>%
-    .[ ,c("Alternativa", "arvore", "vol_cubagem", "vol_criterion", "er", "er_med")]
-  
-  return(crit)
-  
+  if(Comp == 1)         
+  {
+    
+    df <- bind_rows( 
+      filter(Dados, metodo == "Cubagem" & secao <= Limite),
+      filter(Dados, metodo == "Criterion" & secao > Limite) ) %>%
+      arrange(arvore, secao) %>%
+      group_by(arvore) %>%
+      mutate( # funcao para adicionar novas variaveis
+        AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
+        VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
+      summarise(
+        Alternativa   = id,
+        vol_criterion = sum(VCC, na.rm = T)    ) %>%
+      bind_cols( 
+        Dados %>%
+          filter(metodo == "Cubagem") %>% 
+          group_by(arvore) %>%
+          mutate( # funcao para adicionar novas variaveis
+            AS_CC = (dcc^2 * pi) / 40000, # Calculo da AS com casca
+            VCC   = ( (AS_CC + lead(AS_CC) )/2 ) * (lead(secao) - secao) ) %>% # Calculo do volume com casca
+          summarise(vol_cubagem = sum(VCC, na.rm = T) ) %>%
+          select(-arvore)  
+      ) %>%
+      mutate(er = round(((vol_criterion - vol_cubagem)/vol_cubagem)*100, 2) ) 
+    
+    
+  }  
+  return(df)
 }
-
 
 tabReg_ <- function(x, Coeficientes = 2) {
   aux <- c(coef(x), summary(x)$r.squared, summary(x)$sigma)

@@ -9,16 +9,17 @@ dados_ht <- read.csv("extra_info.csv", sep = ",", dec = ".", header = T)
 
 # Calc vol total pelos métodos: Cubagem,criterion, e composto para limites de 1 a 6 ####
 
-all_data <- raw_data %>%
-  do(CubagemComp(., id = "Alternativa 2",Comp = 0)) %>%
-  do(rbind(.,CubagemComp(raw_data, 1.3, id = "Alternativa 3"),
-             CubagemComp(raw_data, 2.3, id = "Alternativa 4"),
-             CubagemComp(raw_data, 3.3, id = "Alternativa 5"),
-             CubagemComp(raw_data, 4.3, id = "Alternativa 6"),
-             CubagemComp(raw_data, 5.3, id = "Alternativa 7"))) %>%
-  do(merge(., dados_ht, by = "arvore")) %>%
-  filter(arvore != 14) %>% #Retirando Outlier
-  arrange(Alternativa)
+all_data <- bind_rows(CubagemComp(raw_data,Comp=0,id = "Alternativa 2"),
+                      CubagemComp(raw_data, 1.3, id  = "Alternativa 3"),
+                      CubagemComp(raw_data, 2.3, id  = "Alternativa 4"),
+                      CubagemComp(raw_data, 3.3, id  = "Alternativa 5"),
+                      CubagemComp(raw_data, 4.3, id  = "Alternativa 6"),
+                      CubagemComp(raw_data, 5.3, id  = "Alternativa 7")) %>%
+           left_join(dados_ht, by = "arvore") %>%
+           filter(arvore != 14) %>% #Retirando Outlier
+           arrange(Alternativa)
+             
+# demonstracao marcio ####
 
 names(raw_data)[names(raw_data) == "Alternativa" ] <- "metodo"
 names(raw_data)[names(raw_data) == "metodo" ] <- "Alternativa"
