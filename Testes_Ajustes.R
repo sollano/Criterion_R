@@ -134,7 +134,7 @@ tab_coef_all_crit <- all_data %>%
               
                          all_data %>% # modelo de volume utilizando cubagem padrao
                          filter(Alternativa == "Alternativa 2") %>% #Cubagem
-                           do(mod = lm(log(vol_criterion) ~ log(dap_criterion) + log(ht_criterion), data = .  )  ) %>%
+                           do(mod = lm(log(vol_cubagem) ~ log(dap_cubagem) + log(ht_cubagem), data = .  )  ) %>%
                            rowwise %>% # aplicar funcoes na linha
                            transmute(b0=coef(mod)[1], # a variavel mod, criada anteriormente, possui os coeficientes na ordem, por isso os extraimos com []
                                      b1=coef(mod)[2],
@@ -143,7 +143,6 @@ tab_coef_all_crit <- all_data %>%
                                      Std.Error=summary(mod)[[6]],
                                      Alternativa = "Alternativa 1"), # extraimos o erro do summario de mod
   
-
                          all_data %>% # cubagem metodos alternativos
                            group_by(Alternativa) %>% # Criterion ate cubagem 6.3
                            do(mod = lm(log(vol_criterion) ~ log(dap_criterion) + log(ht_criterion), data = .  )  ) %>%
@@ -168,10 +167,6 @@ tab_coef_all_crit <- all_data %>%
                          mutate(Alternativa = c("Kozak Criterion", "Kozak Cubagem"))
                ) %>%
               do(data.frame(row.names=.$Alternativa,.[,-6]))
-            
-            
-            
-            
             
  # Dap e Ht Cubagem
 
