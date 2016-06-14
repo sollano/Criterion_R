@@ -127,6 +127,52 @@ tab_coef_all_crit <- all_data %>%
             )) %>%
   do(data.frame(row.names=.$Alternativa,.[,-6]))
 
+            
+            
+            
+            tab_coef_all_crit <- bind_rows(
+              
+                         all_data %>% # modelo de volume utilizando cubagem padrao
+                         filter(Alternativa == "Alternativa 2") %>% #Cubagem
+                           do(mod = lm(log(vol_criterion) ~ log(dap_criterion) + log(ht_criterion), data = .  )  ) %>%
+                           rowwise %>% # aplicar funcoes na linha
+                           transmute(b0=coef(mod)[1], # a variavel mod, criada anteriormente, possui os coeficientes na ordem, por isso os extraimos com []
+                                     b1=coef(mod)[2],
+                                     b2=coef(mod)[3],
+                                     Rsqr=summary(mod)[[9]], # extraimos r quadrado ajustado do summario de mod
+                                     Std.Error=summary(mod)[[6]],
+                                     Alternativa = "Alternativa 1"), # extraimos o erro do summario de mod
+  
+
+                         all_data %>% # cubagem metodos alternativos
+                           group_by(Alternativa) %>% # Criterion ate cubagem 6.3
+                           do(mod = lm(log(vol_criterion) ~ log(dap_criterion) + log(ht_criterion), data = .  )  ) %>%
+                           mutate(b0=coef(mod)[1], # a variavel mod, criada anteriormente, possui os coeficientes na ordem, por isso os extraimos com []
+                                  b1=coef(mod)[2],
+                                  b2=coef(mod)[3],
+                                  Rsqr=summary(mod)[[9]], # extraimos r quadrado ajustado do summario de mod
+                                  Std.Error=summary(mod)[[6]]) %>% # extraimos o erro do summario de mod
+                           select(-mod), 
+                         
+                       raw_data %>% #Kozak
+                         mutate(d_sob_dap_quad = (dcc/dap)^2, h_sob_ht_quad = (secao/ht)^2) %>%
+                         group_by(Alternativa) %>%
+                         do(mod = lm(d_sob_dap_quad ~ sqrt(h_sob_ht_quad) + h_sob_ht_quad, data=. ) ) %>%
+                         transmute(
+                                b0=coef(mod)[1], # a variavel mod, criada anteriormente, possui os coeficientes na ordem, por isso os extraimos com []
+                                b1=coef(mod)[2],
+                                b2=coef(mod)[3],
+                                Rsqr=summary(mod)[[9]], # extraimos r quadrado ajustado do summario de mod
+                                Std.Error=summary(mod)[[6]]) %>% # extraimos o erro do summario de mod
+                         ungroup %>%
+                         mutate(Alternativa = c("Kozak Criterion", "Kozak Cubagem"))
+               ) %>%
+              do(data.frame(row.names=.$Alternativa,.[,-6]))
+            
+            
+            
+            
+            
  # Dap e Ht Cubagem
 
 
