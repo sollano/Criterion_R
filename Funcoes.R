@@ -354,3 +354,73 @@ tabReg_ <- function(x, Coeficientes = 2) {
   return(as.data.frame(t(aux)))
 }
 
+
+sch_vol <- function(df, modvol, name) 
+{
+  df %>%
+    cbind(modvol)  %>% 
+    mutate_(.dots    = 
+              setNames(list(~exp(b0 + b1*log(DAP) + b2*log(HT_EST) ) ), nm = name  ) ) %>%
+    select(-matches("b"),-Rsqr, -Std.Error, -Alternativa )
+}
+
+hdjoin <- function(df, grupos, HT, DAP, OBS, dom, names="HD")
+{
+  suppressPackageStartupMessages(require(dplyr))
+  require(lazyeval)
+  
+  x <- df %>%
+    group_by_(.dots = grupos) %>%
+    filter_( 
+      .dots =
+        interp(~ !is.na(HT), HT = as.name(HT), .values =  list( HT = as.name(HT) ) ) ,
+      interp(~ !is.na(DAP), DAP = as.name(DAP), .values = list( DAP = as.name(DAP) )  ),
+      interp(~ OBS == dom, OBS = as.name(OBS), .values = list(OBS = as.name(OBS) ) )
+    ) %>%
+    summarise_(
+      .dots = 
+        setNames(
+          list(
+            interp( ~mean(HT), HT = as.name(HT) )
+          ),
+          nm=names
+        )
+    ) %>%
+    ungroup
+  
+  
+  df %>%
+    filter_( 
+      .dots =
+        interp(~ !is.na(DAP), DAP = as.name(DAP), .values = list( DAP = as.name(DAP) )  )
+    ) %>%
+    left_join(x, by = grupos)
+  
+}
+
+hd <- function(df, grupos, HT, DAP, OBS, dom, names="HD")
+{
+  suppressPackageStartupMessages(require(dplyr))
+  require(lazyeval)
+  
+  df %>%
+    group_by_(.dots = grupos) %>%
+    filter_( 
+      .dots =
+        interp(~ !is.na(HT), HT = as.name(HT), .values =  list( HT = as.name(HT) ) ) ,
+      interp(~ !is.na(DAP), DAP = as.name(DAP), .values = list( DAP = as.name(DAP) )  ),
+      interp(~ OBS == dom, OBS = as.name(OBS), .values = list(OBS = as.name(OBS) ) )
+    ) %>%
+    summarise_(
+      .dots = 
+        setNames(
+          list(
+            interp( ~mean(HT), HT = as.name(HT) )
+          ),
+          nm=names
+        )
+    ) %>%
+    ungroup
+}
+
+
