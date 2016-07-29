@@ -3,201 +3,419 @@
 
 source("Funcoes.R")
 
-# Carregar Dados ####
-
-#all_data <- read.csv("tab_totaliz.csv", header = TRUE, check.names = FALSE)
-
-#all_data  <- read.xlsx("critxcub.xlsx", sheetName = "all", header = TRUE)
-#box_data1 <- read.xlsx("critxcub.xlsx", sheetName = "all.1", header = TRUE)
-#critcub   <- read.xlsx("critxcub.xlsx", sheetName = "crit", header = TRUE)
-#critcub1  <- read.xlsx("critxcub.xlsx", sheetName = "crit1.3", header = TRUE)
-#critcub2  <- read.xlsx("critxcub.xlsx", sheetName = "crit2.3", header = TRUE)
-#critcub3  <- read.xlsx("critxcub.xlsx", sheetName = "crit3.3", header = TRUE)
-#critcub4  <- read.xlsx("critxcub.xlsx", sheetName = "crit4.3", header = TRUE)
-#critcub5  <- read.xlsx("critxcub.xlsx", sheetName = "crit5.3", header = TRUE)
-#critcub6  <- read.xlsx("critxcub.xlsx", sheetName = "crit6.3", header = TRUE)
-#taper     <- read.xlsx("critxcub.xlsx", sheetName = "taper_all", header = TRUE)
-
 # Boxplots cubagem por Árvore ####
 
 box_arvore <- all_data %>%
-  filter(Alternativa == "Alternativa 2") %>%
+  filter(Alternativa == "Alternativa_2") %>%
   select(volume = vol_cubagem) %>%
-  mutate(Alternativa = rep("Alternativa 1", 1:length(.))) %>%
-  do(rbind(., select(all_data, Alternativa, volume = vol_criterion))) %>%
-  filter(Alternativa %in% c("Alternativa 1", "Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5")) %>%
-  ggplot(., aes(x = Alternativa, y = volume, colour = Alternativa, fill = Alternativa, alpha = 1)) + geom_boxplot(show_guide = FALSE) + labs(x="Alternativa", y="Volume (m³)") + ggtitle("Boxplots de Volume por Árvore") + theme_grey(base_family = "Arial Unicode MS" ) + stat_summary(fun.y=mean, geom="point", shape=18, size=3, show_guide=FALSE) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold")) + scale_x_discrete(limits=c("Alternativa 1", "Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5"))
-
-box_arvore_inv <- all_data %>%
-  filter(Alternativa == "Alternativa 2") %>%
-  select(volume = vol_cubagem) %>%
-  mutate(Alternativa = rep("Alternativa 1", 1:length(.))) %>%
-  do(rbind(., select(all_data, Alternativa, volume = vol_criterion))) %>%
-  filter(Alternativa %in% c("Alternativa 1", "Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5")) %>%
-  ggplot(., aes(x = Alternativa, y = volume, colour = Alternativa, fill = Alternativa, alpha = 1)) + geom_boxplot(show_guide = FALSE) + labs(x="Alternativa", y="Volume (m³)") + ggtitle("Boxplots de Volume por Árvore") + theme_grey(base_family = "Arial Unicode MS" ) + stat_summary(fun.y=mean, geom="point", shape=18, size=3, show_guide=FALSE) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold")) + scale_x_discrete(limits=c("Alternativa 1", "Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5")) + coord_flip()
-
-# Scatterplots ####
+  mutate(Alternativa = rep("Alternativa_1", 1:length(.)) ) %>%
+  rbind(select(all_data, Alternativa, volume = vol_criterion)) %>%
+  mutate(Alternativa = factor(Alternativa, labels = 1:5)  ) %>% 
+  ggplot(aes(x = Alternativa,
+             y = volume, 
+             colour = Alternativa, 
+             fill = Alternativa, 
+             alpha = 1)) + 
+  geom_boxplot(show.legend = FALSE) + 
+  stat_summary(fun.y=mean, geom="point", shape=18, size=3, show.legend = F) + 
+  labs(x="Alternativa", 
+       y="Volume (m³)",
+       title = "Boxplots de Volume por Árvore" ) + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
 
 # - Kozak ####
 
-#kozak_cub1 <- raw_data %>% filter(Alternativa == "Alternativa 1") %>% mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht) %>% ggplot(., aes(x=d_sob_dap, y=h_sob_ht)) + geom_point(size = 2, alpha = .4) + labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak  Cubagem") + scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + coord_fixed(ratio=4) + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#kozak_cub2 <- raw_data %>% filter(Alternativa == "Alternativa 1") %>% mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht) %>% ggplot(., aes(x=d_sob_dap, y=h_sob_ht)) + geom_point(size = 2, alpha = .4) + labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak  Cubagem") + scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + coord_fixed(ratio=3) + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#kozak_cub3 <- raw_data %>% filter(Alternativa == "Alternativa 1") %>% mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht) %>% ggplot(., aes(x=d_sob_dap, y=h_sob_ht)) + geom_point(size = 2, alpha = .4) + labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak  Cubagem") + scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + coord_fixed(ratio=2) + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
+kzk  <- raw_data %>% 
+  mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht,
+         metodo = factor(metodo, labels = c("a", "b") )  ) %>% 
+  ggplot(aes(x=d_sob_dap, y=h_sob_ht)) + 
+  geom_point(size = 2, alpha = .4) + 
+  labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak") + 
+  scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + 
+  coord_fixed(ratio=3)  + 
+  theme_grey(base_family = "Arial Unicode MS" ) + 
+  facet_grid(. ~ metodo) + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
 
-#kozak_crit1 <- raw_data %>% filter(Alternativa == "Alternativa 2") %>% mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht) %>% ggplot(., aes(x=d_sob_dap, y=h_sob_ht)) + geom_point(size = 2, alpha = .4) + labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak  Criterium") + scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + coord_fixed(ratio=4) + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#kozak_crit2 <- raw_data %>% filter(Alternativa == "Alternativa 2") %>% mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht) %>% ggplot(., aes(x=d_sob_dap, y=h_sob_ht)) + geom_point(size = 2, alpha = .4) + labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak  Criterium") + scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + coord_fixed(ratio=3) + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#kozak_crit3 <- raw_data %>% filter(Alternativa == "Alternativa 2") %>% mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht) %>% ggplot(., aes(x=d_sob_dap, y=h_sob_ht)) + geom_point(size = 2, alpha = .4) + labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak  Criterium") + scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + coord_fixed(ratio=2) + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
+# -- Cubagem Residuo em Porcentagem ####
 
-kzk1 <- raw_data %>% mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht) %>% ggplot(., aes(x=d_sob_dap, y=h_sob_ht)) + geom_point(size = 2, alpha = .4) + labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak") + scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + coord_fixed(ratio=4)  + theme_grey(base_family = "Arial Unicode MS" ) + facet_grid(. ~ Alternativa) + theme(panel.margin = unit(2, "lines"), plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
-kzk2 <- raw_data %>% mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht) %>% ggplot(., aes(x=d_sob_dap, y=h_sob_ht)) + geom_point(size = 2, alpha = .4) + labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak") + scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + coord_fixed(ratio=3)  + theme_grey(base_family = "Arial Unicode MS" ) + facet_grid(. ~ Alternativa) + theme(panel.margin = unit(2, "lines"), plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
-kzk3 <- raw_data %>% mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht) %>% ggplot(., aes(x=d_sob_dap, y=h_sob_ht)) + geom_point(size = 2, alpha = .4) + labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak") + scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + coord_fixed(ratio=2)  + theme_grey(base_family = "Arial Unicode MS" ) + facet_grid(. ~ Alternativa) + theme(panel.margin = unit(2, "lines"), plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
+cub_res_disp <- all_data %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(vol_cubagem, er))  + 
+  geom_hline(yintercept = 0, colour = "gray45") + 
+  geom_point(aes(colour=ht_cubagem), size = 3)  + 
+  facet_wrap( ~ Alternativa, nrow = 1) + 
+  labs(x      = "Volume Alternativa 1 (m³)", 
+       y      = "Resíduo (%)"              , 
+       colour = "HT (m)"         ,
+       title  = "Gráfico de Dispersão  dos residuos em relação à Alternativa 1" ) +
+  coord_cartesian(ylim = c(-40,40) ) + 
+  scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
 
-# -- Cubagem x Residuo + Altura ####
-
-#cub_res_alt  <- all_data %>% filter(Alternativa == "Alternativa 2") %>% ggplot(., aes(x = vol_cubagem, y = er)) + geom_point(aes(colour=ht_cubagem), size = 3) + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Observado m³", y="Resíduo (%)", colour = "Altura Total (m)") + ggtitle("Alternativa 1 x Resíduo Alternativa 2") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_res_alt1 <- all_data %>% filter(Alternativa == "Alternativa 3") %>% ggplot(., aes(x = vol_cubagem, y = er)) + geom_point(aes(colour=ht_cubagem), size = 3) + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Observado m³", y="Resíduo (%)", colour = "Altura Total (m)") + ggtitle("Alternativa 1 x Resíduo Alternativa 3 ") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_res_alt2 <- all_data %>% filter(Alternativa == "Alternativa 4") %>% ggplot(., aes(x = vol_cubagem, y = er)) + geom_point(aes(colour=ht_cubagem), size = 3) + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Observado m³", y="Resíduo (%)", colour = "Altura Total (m)") + ggtitle("Alternativa 1 x Resíduo Alternativa 4 ") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_res_alt3 <- all_data %>% filter(Alternativa == "Alternativa 5") %>% ggplot(., aes(x = vol_cubagem, y = er)) + geom_point(aes(colour=ht_cubagem), size = 3) + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Observado m³", y="Resíduo (%)", colour = "Altura Total (m)") + ggtitle("Alternativa 1 x Resíduo Alternativa 5 ") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_res_alt4 <- all_data %>% filter(Alternativa == "Alternativa 6") %>% ggplot(., aes(x = vol_cubagem, y = er)) + geom_point(aes(colour=ht_cubagem), size = 3) + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Observado m³", y="Resíduo (%)", colour = "Altura Total (m)") + ggtitle("Alternativa 1 x Resíduo Alternativa 6 ") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_res_alt5 <- all_data %>% filter(Alternativa == "Alternativa 7") %>% ggplot(., aes(x = vol_cubagem, y = er)) + geom_point(aes(colour=ht_cubagem), size = 3) + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Observado m³", y="Resíduo (%)", colour = "Altura Total (m)") + ggtitle("Alternativa 1 x Resíduo Alternativa 7 ") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_res_alt6 <- all_data %>% filter(Alternativa == "Alternativa 8") %>% ggplot(., aes(x = vol_cubagem, y = er)) + geom_point(aes(colour=ht_cubagem), size = 3) + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Observado m³", y="Resíduo (%)", colour = "Altura Total (m)") + ggtitle("Alternativa 1 x Resíduo Alternativa 8 ") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-
-cub_res_alt_all <- ggplot(all_data, aes(vol_cubagem, er))  + geom_point(aes(colour=ht_cubagem), size = 3)  + scale_colour_gradient(low = "lightblue", high = "dark blue") + ggtitle("Gráfico de Dispersão  dos residuos em relação à Alternativa 1")  + labs(x="Volume Alternativa 1 (m³)", y="Resíduo (%)", colour = "Altura Total (m)") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + facet_wrap( ~ Alternativa, nrow = 1) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
-cub_res_alt_1_3 <- all_data %>% filter(Alternativa %in% c("Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5") ) %>% ggplot(., aes(vol_cubagem, er))  + geom_point(aes(colour=ht_cubagem), size = 3)  + scale_colour_gradient(low = "lightblue", high = "dark blue") + ggtitle("Gráfico de Dispersão  dos residuos em relação à Alternativa 1")  + labs(x="Volume Alternativa 1 (m³)", y="Resíduo (%)", colour = "Altura Total (m)") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + facet_grid(. ~ Alternativa) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
 
 # -- Cubagem x Criterion + Erro Relativo + Ajuste Linear ####
 
-#cub_crit_er_lm  <- all_data %>% filter(Alternativa == "Alternativa 2") %>% ggplot(., aes(x = vol_cubagem, y = vol_criterion)) + geom_point(aes(colour=er), size = 3) + labs(x="Volume Observado (m³)", y="Volume Estimado (m³)", title="Alternativa 1 x Alternativa 2", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" )  + scale_colour_gradient(low = "lightblue", high = "dark blue") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_crit_er_lm1 <- all_data %>% filter(Alternativa == "Alternativa 3") %>% ggplot(., aes(x = vol_cubagem, y = vol_criterion)) + geom_point(aes(colour=er), size = 3) + labs(x="Volume Observado (m³)", y="Volume Estimado (m³)", title="Alternativa 1 x Alternativa 3 ", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" )  + scale_colour_gradient(low = "lightblue", high = "dark blue") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_crit_er_lm2 <- all_data %>% filter(Alternativa == "Alternativa 4") %>% ggplot(., aes(x = vol_cubagem, y = vol_criterion)) + geom_point(aes(colour=er), size = 3) + labs(x="Volume Observado (m³)", y="Volume Estimado (m³)", title="Alternativa 1 x Alternativa 4 ", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" )  + scale_colour_gradient(low = "lightblue", high = "dark blue") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_crit_er_lm3 <- all_data %>% filter(Alternativa == "Alternativa 5") %>% ggplot(., aes(x = vol_cubagem, y = vol_criterion)) + geom_point(aes(colour=er), size = 3) + labs(x="Volume Observado (m³)", y="Volume Estimado (m³)", title="Alternativa 1 x Alternativa 5 ", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" )  + scale_colour_gradient(low = "lightblue", high = "dark blue") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_crit_er_lm4 <- all_data %>% filter(Alternativa == "Alternativa 6") %>% ggplot(., aes(x = vol_cubagem, y = vol_criterion)) + geom_point(aes(colour=er), size = 3) + labs(x="Volume Observado (m³)", y="Volume Estimado (m³)", title="Alternativa 1 x Alternativa 6 ", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" )  + scale_colour_gradient(low = "lightblue", high = "dark blue") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_crit_er_lm5 <- all_data %>% filter(Alternativa == "Alternativa 7") %>% ggplot(., aes(x = vol_cubagem, y = vol_criterion)) + geom_point(aes(colour=er), size = 3) + labs(x="Volume Observado (m³)", y="Volume Estimado (m³)", title="Alternativa 1 x Alternativa 7 ", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" )  + scale_colour_gradient(low = "lightblue", high = "dark blue") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#cub_crit_er_lm6 <- all_data %>% filter(Alternativa == "Alternativa 8") %>% ggplot(., aes(x = vol_cubagem, y = vol_criterion)) + geom_point(aes(colour=er), size = 3) + labs(x="Volume Observado (m³)", y="Volume Estimado (m³)", title="Alternativa 1 x Alternativa 8 ", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" )  + scale_colour_gradient(low = "lightblue", high = "dark blue") + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-
-cub_crit_er_lm_all <- ggplot(all_data, aes(vol_cubagem, vol_criterion))  + geom_point(aes(colour=er), size = 3)  + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Alternativa 1 (m³)", y="Volume Estimado (m³)", title="Gráfico de Dispersão Entre Volume para da Alternativa 1 e as Demais Alternativas", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" ) + facet_wrap( ~ Alternativa, nrow = 1) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
-cub_crit_er_lm_1_3 <- all_data %>% filter(Alternativa %in% c("Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5") ) %>% ggplot(., aes(vol_cubagem, vol_criterion))  + geom_point(aes(colour=er), size = 3)  + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Alternativa 1 (m³)", y="Volume Estimado (m³)", title="Gráfico de Dispersão Entre  o Volume para da Alternativa 1 e as Demais Alternativas", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" ) + facet_grid(. ~ Alternativa) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
+cub_vol_obs_est <-  all_data %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(vol_cubagem, vol_criterion))  + 
+  geom_point(aes(colour=er), size = 3)  + 
+  geom_smooth(method="lm", colour="gray25") + 
+  facet_wrap( ~ Alternativa, nrow = 1) + 
+  labs(x      = "Volume Alternativa 1 (m³)", 
+       y      = "Volume Alternativas  (m³)"     , 
+       colour = "Erro Relativo (%)"        ,
+       title  = "Gráfico de Dispersão para o Volume Calculado pelas Alternativas 2 a 5 em relacao a 1") + 
+  scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
 
 # Histogramas de erro ####
 
-cub_res_hist_1_3 <- all_data %>% filter(Alternativa %in% c("Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5") ) %>% ggplot(. , aes(er, ..density..)) + geom_histogram(binwidth = 4) + facet_wrap(~Alternativa, nrow = 1) + labs(y = "Densidade", x= "Residuo (%)", title = "Histograma para os Resíduos das Diferentes Alternativas") + geom_hline(yintercept = 0, colour = "dark grey")  + theme(panel.margin = unit(2, "lines"), plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold")) + xlim(-30, 30)
-cub_res_hist_all <- ggplot(all_data , aes(er, ..density..))  + geom_histogram(binwidth = 4) + facet_wrap(~Alternativa, nrow = 1) + labs(y = "Densidade", x= "Residuo (%)", title = "Histograma para os Resíduos das Diferentes Alternativas") + geom_hline(yintercept = 0, colour = "dark grey")  + theme(panel.margin = unit(2, "lines"), plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold")) + xlim(-30, 30)
+cub_res_hist <-  all_data %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(er, ..density..))  + 
+  geom_vline(xintercept = 0, colour = "gray45")  + 
+  geom_histogram(binwidth = 4) + 
+  facet_wrap(~Alternativa, nrow = 1) + 
+  labs(y = "Densidade", 
+       x= "Residuo (%)", 
+       title = "Histograma para os Resíduos das Diferentes Alternativas") + 
+  xlim(-30, 30) +
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
 
 
 #  --- Ajustes do modelo de Schummacher & Hall ####
 
-#   == Ajuste utilizando o dap medido pelo criterion ####
-
-#schummacher_cub   <- all_data %>% filter(Alternativa == "Alternativa 1") %>% ggplot(., aes(x=log(dap_cubagem) + log(ht_cubagem), y= log(vol_cubagem))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados da Alternativa 1") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14)))
-#schummacher_crit  <- all_data %>% filter(Alternativa == "Alternativa 2") %>% ggplot(., aes(x=log(dap_criterion) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados do Alternativa 2") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14)))
-#schummacher_crit1 <- all_data %>% filter(Alternativa == "Alternativa 3") %>% ggplot(., aes(x=log(dap_criterion) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados da Alternativa 3") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14)))
-#schummacher_crit2 <- all_data %>% filter(Alternativa == "Alternativa 4") %>% ggplot(., aes(x=log(dap_criterion) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados da Alternativa 4") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14)))
-#schummacher_crit3 <- all_data %>% filter(Alternativa == "Alternativa 5") %>% ggplot(., aes(x=log(dap_criterion) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados da Alternativa 5") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14)))
-#schummacher_crit4 <- all_data %>% filter(Alternativa == "Alternativa 6") %>% ggplot(., aes(x=log(dap_criterion) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados da Alternativa 6") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14)))
-#schummacher_crit5 <- all_data %>% filter(Alternativa == "Alternativa 7") %>% ggplot(., aes(x=log(dap_criterion) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados da Alternativa 7") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#schummacher_crit6 <- all_data %>% filter(Alternativa == "Alternativa 8") %>% ggplot(., aes(x=log(dap_criterion) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados da Alternativa 8") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-
-#schummacher_crit_all <- ggplot(all_data, aes(x=log(dap_criterion) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados do Criterion") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14)) + facet_wrap( ~ Alternativa, nrow = 1)
-#schummacher_crit_1_3 <- all_data %>% filter(Alternativa %in% c("Alternativa 1", "Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5") ) %>% ggplot(., aes(x=log(dap_criterion) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall  para os dados do Criterion") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14)) + facet_grid(. ~ Alternativa)
-
 #    === Ajuste utilizando o dap medido pela cubagem (correto) ####
 
-#schummacher_crit_corr  <- all_data %>% filter(Alternativa == "Alternativa 2") %>% ggplot(., aes(x=log(dap_cubagem) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste Corrigido  do modelo de Schummacher & Hall  para os dados da Alternativa 2") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#schummacher_crit_corr1 <- all_data %>% filter(Alternativa == "Alternativa 3") %>% ggplot(., aes(x=log(dap_cubagem) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste Corrigido  do modelo de Schummacher & Hall  para os dados da Alternativa 3") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#schummacher_crit_corr2 <- all_data %>% filter(Alternativa == "Alternativa 4") %>% ggplot(., aes(x=log(dap_cubagem) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste Corrigido  do modelo de Schummacher & Hall  para os dados da Alternativa 4") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#schummacher_crit_corr3 <- all_data %>% filter(Alternativa == "Alternativa 5") %>% ggplot(., aes(x=log(dap_cubagem) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste Corrigido  do modelo de Schummacher & Hall  para os dados da Alternativa 5") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#schummacher_crit_corr4 <- all_data %>% filter(Alternativa == "Alternativa 6") %>% ggplot(., aes(x=log(dap_cubagem) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste Corrigido  do modelo de Schummacher & Hall  para os dados da Alternativa 6") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#schummacher_crit_corr5 <- all_data %>% filter(Alternativa == "Alternativa 7") %>% ggplot(., aes(x=log(dap_cubagem) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste Corrigido  do modelo de Schummacher & Hall  para os dados da Alternativa 7") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
-#schummacher_crit_corr6 <- all_data %>% filter(Alternativa == "Alternativa 8") %>% ggplot(., aes(x=log(dap_cubagem) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste Corrigido  do modelo de Schummacher & Hall  para os dados da Alternativa 8") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14))
 
-schummacher_crit_all <- ggplot(all_data, aes(x=log(dap_cubagem) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do Modelo de Schummacher & Hall") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold")) + facet_wrap( ~ Alternativa, nrow = 1)
-schummacher_crit_1_3 <- all_data %>% filter(Alternativa %in% c("Alternativa 1", "Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5") ) %>% ggplot(., aes(x=log(dap_cubagem) + log(ht_criterion), y=log(vol_criterion))) + geom_point(size=4) + stat_smooth(method ="lm", color="red") + labs(x = "Ln(DAP) + Ln(HT)", y = "Ln(VCC)", title = "Ajuste do modelo de Schummacher & Hall") + theme_grey(base_family = "Arial Unicode MS" ) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold")) + facet_grid(. ~ Alternativa)
+schummacher_crit <-  all_data %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(x = log(dap_cubagem) + log(ht_criterion),
+             y = log(vol_criterion))) + 
+  geom_point(size=4) +
+  stat_smooth(method ="lm", color="gray45") + 
+ facet_wrap( ~ Alternativa, nrow = 1) + 
+  labs(x     = "Ln(DAP) + Ln(HT)", 
+       y     = "Ln(VCC)", 
+       title = "Ajuste do Modelo de Schummacher & Hall") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
 
-# Cubagem x Vol Estimado ####
+# GRAFICOS NIVEL DE ARVORE
+# Inventario Res Porcentagem Dipersao Arvore ####
+#cub_res_vol_est_all 
 
-cub_res_vol_est_all <- ggplot(vol_est, aes(VOL_OBS, er))  + geom_point(aes(colour=HT), size = 3)  + scale_colour_gradient(low = "lightblue", high = "dark blue") + ggtitle("Dispersão dos Residuos do Volume Estimado das Diferentes Alternativas")  + labs(x="Volume Estimado Alternativa 1 (m³)", y="Resíduo (%)", colour = "Altura Total (m)") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + facet_wrap( ~ Alternativa, nrow = 1) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
-cub_res_vol_est_1_3 <- vol_est %>% filter(Alternativa %in% c("Alternativa 1", "Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5") ) %>% ggplot(., aes(VOL_OBS, er))  + geom_point(aes(colour=HT), size = 3)  + scale_colour_gradient(low = "lightblue", high = "dark blue") + ggtitle("Dispersão dos Residuos do Volume Estimado das Diferentes Alternativas")  + labs(x="Volume Estimado Alternativa 1 (m³)", y="Resíduo (%)", colour = "Altura Total (m)") + coord_cartesian(ylim = c(-40,40)) + theme_grey(base_family = "Arial Unicode MS" )  + geom_hline(yintercept = 0, colour = "dark grey") + facet_grid(. ~ Alternativa) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
+inv_res_disp_arv  <-  vol_est_arv %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(VOL_OBS, er))  + 
+  geom_hline(yintercept = 0, colour = "gray45") + 
+  geom_point(aes(colour=HT), size = 3)  + 
+  facet_wrap( ~ Alternativa, nrow = 1)  + 
+  labs(x      = "Volume Estimado Alternativa 1 (m³)", 
+       y      = "Resíduo (%)", 
+       colour = "HT (m)",
+       title  = "Dispersão dos Residuos do Volume Estimado das Diferentes Alternativas\n em nivel de Arvore") + 
+  coord_cartesian(ylim = c(-40,40)) + 
+  scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
 
-cub_vol_est_er_lm_all <- ggplot(vol_est, aes(VOL_OBS, VOL_EST))  + geom_point(aes(colour=er), size = 3)  + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Estimado Alternativa 1 (m³)", y="Volume Estimado (m³)", title="Gráfico de Dispersão para o Volume Estimado pelo Modelo de Schumacher", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" ) + facet_wrap( ~ Alternativa, nrow = 1) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
-cub_vol_est_er_lm_1_3 <- vol_est %>% filter(Alternativa %in% c("Alternativa 1", "Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5") ) %>% ggplot(., aes(VOL_OBS, VOL_EST))  + geom_point(aes(colour=er), size = 3)  + scale_colour_gradient(low = "lightblue", high = "dark blue") + labs(x="Volume Estimado Alternativa 1 (m³)", y="Volume Estimado (m³)", title="Gráfico de Dispersão para o Volume Estimado pelo Modelo de Schumacher", colour = "Erro Relativo (%)") + geom_smooth(method="lm", colour="red") + theme_grey(base_family = "Arial Unicode MS" ) + facet_grid(. ~ Alternativa) + theme(plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold"))
+# Inventario Res porcentagem Histograma Arvore ####
 
-cub_vol_est_hist_er_1_3 <- vol_est %>% filter(Alternativa %in% c("Alternativa 1", "Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5") ) %>% ggplot(. , aes(er, ..density..)) + geom_histogram(binwidth = 1) + facet_wrap(~Alternativa, nrow = 1) + labs(y = "Densidade", x= "Residuo (%)", title = "Histograma para os Resíduos do Volume Estimado pelo Modelo de Schumacher") + geom_hline(yintercept = 0, colour = "dark grey")  + theme(panel.margin = unit(2, "lines"), plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14), strip.text.x = element_text(size=12, face="bold")) + xlim(-50, 50) + ylim(0, .4)
-cub_vol_est_hist_er_all <- ggplot(vol_est , aes(er, ..density..)) + geom_histogram(binwidth = 1) + facet_wrap(~Alternativa, nrow = 1) + labs(y = "Densidade", x= "Residuo (%)", title = "Histograma para os Resíduos do Volume Estimado pelo Modelo de Schumacher") + geom_hline(yintercept = 0, colour = "dark grey")  + theme(panel.margin = unit(2, "lines"), plot.title=element_text(size = 16, face="bold", vjust = 0.9), axis.title=element_text(size = 14)) + xlim(-50, 50) + ylim(0, .4)
+inv_hist_vol_arv <-  vol_est_arv %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(er, ..density..)) +
+  geom_vline(xintercept = 0, colour = "gray45")  + 
+  geom_histogram(binwidth = 1) + 
+  facet_wrap(~Alternativa, nrow = 1) + 
+  xlim(-30, 30) + 
+  labs(y     = "Densidade", 
+       x     = "Residuo (%)", 
+       title = "Histograma para os Resíduos do Volume Estimado pelo Modelo de Schumacher") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
 
+
+
+
+# Vol X VolEST Arvore ####
+
+inv_vol_obs_est_arv <-  vol_est_arv %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(VOL_OBS, VOL_EST))  + 
+  geom_point(aes(colour=er), size = 3)  + 
+  geom_smooth(method="lm", colour="gray25") + 
+  facet_wrap( ~ Alternativa, nrow = 1) + 
+  labs(x      = "Volume Estimado Alternativa 1 (m³)", 
+       y      = "Volume Estimado (m³)", 
+       colour = "Erro Relativo (%)", 
+       title  = "Gráfico de Dispersão para o Volume Estimado pelas Alternativas 2 a 5 em relacao a 1 \n em nivel de Arvore") + 
+  scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
+
+
+# GRAFICOS NIVEL DE PARCELA
+# Inventario Res Porcentagem Dipersao parcela ####
+
+inv_res_disp_parc  <-  vol_est_parcela %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(VOL_OBS, er))  + 
+  geom_hline(yintercept = 0, colour = "gray45") + 
+  geom_point(aes(colour=HT), size = 3)  + 
+  facet_wrap( ~ Alternativa, nrow = 1)  + 
+  labs(x      = "Volume Estimado Alternativa 1 (m³)", 
+       y      = "Resíduo (%)", 
+       colour = "HT (m)",
+       title  = "Dispersão dos Residuos do Volume Estimado das Diferentes Alternativas\n em nivel de Parcela") + 
+  coord_cartesian(ylim = c(-40,40)) + 
+  scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
+
+# Inventario Res porcentagem Histograma parcela ####
+
+inv_hist_vol_parc <-  vol_est_parcela %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(er, ..density..)) +
+  geom_vline(xintercept = 0, colour = "gray45")  + 
+  geom_histogram(binwidth = 1) + 
+  facet_wrap(~Alternativa, nrow = 1) + 
+  xlim(-30, 30) + 
+  labs(y     = "Densidade", 
+       x     = "Residuo (%)", 
+       title = "Histograma para os Resíduos do Volume Estimado pelo Modelo de Schumacher") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
+
+
+
+
+# Vol X VolEST parcela ####
+
+inv_vol_obs_est_parc <-  vol_est_parcela %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(VOL_OBS, VOL_EST))  + 
+  geom_point(aes(colour=er), size = 3)  + 
+  geom_smooth(method="lm", colour="gray25") + 
+  facet_wrap( ~ Alternativa, nrow = 1) + 
+  labs(x      = "Volume Estimado Alternativa 1 (m³)", 
+       y      = "Volume Estimado (m³)", 
+       colour = "Erro Relativo (%)", 
+       title  = "Gráfico de Dispersão para o Volume Estimado pelas Alternativas 2 a 5 em relacao a 1 \n em nivel de Arvore") + 
+  scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
+
+
+# GRAFICOS NIVEL DE TALHAO
+# Inventario Res Porcentagem Dipersao TALHAO ####
+
+inv_res_disp_talh  <-  vol_est_talhao %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(VOL_OBS, er))  + 
+  geom_hline(yintercept = 0, colour = "gray45") + 
+  geom_point(aes(colour=HT), size = 3)  + 
+  facet_wrap( ~ Alternativa, nrow = 1)  + 
+  labs(x      = "Volume Estimado Alternativa 1 (m³)", 
+       y      = "Resíduo (%)", 
+       colour = "HT (m)",
+       title  = "Dispersão dos Residuos do Volume Estimado das Diferentes Alternativas\n em nivel de Talhao") + 
+  coord_cartesian(ylim = c(-40,40)) + 
+  scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
+
+# Inventario Res porcentagem Histograma TALHAO ####
+
+inv_hist_vol_talh <-  vol_est_talhao %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(er, ..density..)) +
+  geom_vline(xintercept = 0, colour = "gray45")  + 
+  geom_histogram(binwidth = 1) + 
+  facet_wrap(~Alternativa, nrow = 1) + 
+  xlim(-30, 30) + 
+  labs(y     = "Densidade", 
+       x     = "Residuo (%)", 
+       title = "Histograma para os Resíduos do Volume Estimado pelo Modelo de Schumacher") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
+
+
+
+
+# Vol X VolEST TALHAO ####
+
+inv_vol_obs_est_talh <-  vol_est_talhao %>%
+  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  ggplot(aes(VOL_OBS, VOL_EST))  + 
+  geom_point(aes(colour=er), size = 3)  + 
+  geom_smooth(method="lm", colour="gray25") + 
+  facet_wrap( ~ Alternativa, nrow = 1) + 
+  labs(x      = "Volume Estimado Alternativa 1 (m³)", 
+       y      = "Volume Estimado (m³)", 
+       colour = "Erro Relativo (%)", 
+       title  = "Gráfico de Dispersão para o Volume Estimado pelas Alternativas 2 a 5 em relacao a 1 \n em nivel de Arvore") + 
+  scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+  theme_igray(base_family = "Arial Unicode MS") + 
+  theme(panel.margin = unit(2, "lines"), 
+        plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+        axis.title   = element_text(size = 14), 
+        axis.text    = element_text(size = 12),
+        strip.text.x = element_text(size = 16))  
+
+
+
+# Graficos inventario grid.arrange ####
+
+# Grid arrange Res Porcentagem ####
+
+inv_res_disp_grid <- grid.arrange(
+  vol_est_arv %>%
+    mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+    ggplot(aes(VOL_OBS, er))  + 
+    geom_hline(yintercept = 0, colour = "gray45") + 
+    geom_point(aes(color=HT), size = 3, show.legend = F)  + 
+    facet_wrap( ~ Alternativa, nrow = 1)  + 
+    labs(x = NULL,
+         y = NULL,
+         title = "A") +
+    coord_cartesian(ylim = c(-40,40)) + 
+    scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+    theme_igray(base_family = "Arial Unicode MS") + 
+    theme(panel.margin = unit(2, "lines"), 
+          plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+          axis.title   = element_text(size = 14), 
+          axis.text    = element_text(size = 12),
+          strip.text.x = element_text(size = 16)) +
+    guides(color = guide_colorbar(title= NULL, label = F, barheight = 0))
+  ,
+  vol_est_parcela %>%
+    mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+    ggplot(aes(VOL_OBS, er))  + 
+    geom_hline(yintercept = 0, colour = "gray45") + 
+    geom_point(aes(color=HT), size = 3, show.legend = F)  + 
+    facet_wrap( ~ Alternativa, nrow = 1)  + 
+    labs(x = NULL,
+         y = NULL,
+         color = "HT (m)",
+         title = "B") +
+    coord_cartesian(ylim = c(-40,40)) + 
+    scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+    theme_igray(base_family = "Arial Unicode MS") + 
+    theme(panel.margin = unit(2, "lines"), 
+          plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+          axis.title   = element_text(size = 14), 
+          axis.text    = element_text(size = 12),
+          strip.text.x = element_text(size = 16)) ,  
+  
+  vol_est_talhao %>%
+    mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+    ggplot(aes(VOL_OBS, er))  + 
+    geom_hline(yintercept = 0, colour = "gray45") + 
+    geom_point(aes(color=HT), size = 3, show.legend = F)  + 
+    facet_wrap( ~ Alternativa, nrow = 1)  + 
+    labs(x = NULL,
+         y = NULL,
+         title = "C") +
+    coord_cartesian(ylim = c(-40,40)) + 
+    scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+    theme_igray(base_family = "Arial Unicode MS") + 
+    theme(panel.margin = unit(2, "lines"), 
+          plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
+          axis.title   = element_text(size = 14), 
+          axis.text    = element_text(size = 12),
+          strip.text.x = element_text(size = 16)) +
+    guides(color = guide_colorbar(title= NULL, label = F, barheight = 0))   ,
+  left     = grid.text("Resíduo (%)", gp=gpar(fontsize=16 ), rot = 90) ,
+  bottom   = grid.text("Volume Estimado Alternativa 1 (m)³", gp=gpar(fontsize=16 ) )  )
 
 
 # Exportar os gráficos em .png ####
 
 # Graficos Finais ####
 
-ggsave(kzk2, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/kzk.png")
-ggsave(box_arvore_inv, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/boxbox_arvore_inv.png")
+ggsave(kzk, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/kzk.png")
 ggsave(box_arvore, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/boxbox_arvore.png")
-ggsave(cub_res_alt_all, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_res_alt_all.png")
-ggsave(cub_res_alt_1_3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_res_alt_1_3.png")
-ggsave(cub_crit_er_lm_all, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_crit_er_lm_all.png")
-ggsave(cub_crit_er_lm_1_3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_crit_er_lm_1_3.png")
-ggsave(schummacher_crit_all, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/schummacher_crit_all.png")
-ggsave(schummacher_crit_1_3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/schummacher_crit_1_3.png")
-ggsave(cub_res_vol_est_all, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_res_vol_est_all.png")
-ggsave(cub_res_vol_est_1_3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_res_vol_est_1_3.png")
-ggsave(cub_vol_est_er_lm_all, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_vol_est_er_lm_all.png")
-ggsave(cub_vol_est_er_lm_1_3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_vol_est_er_lm_1_3.png")
-ggsave(cub_res_hist_1_3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_res_hist_1_3.png")
-ggsave(cub_res_hist_all, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_res_hist_all.png")
-ggsave(cub_vol_est_hist_er_1_3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_vol_est_hist_er_1_3.png")
-ggsave(cub_vol_est_hist_er_all, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_vol_est_hist_er_all.png")
-
-cub_vol_est_hist_er_1_3
-
-# Graficos Individuais ####
-
-# Kozak
-ggsave(kozak_cub2, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/kozak_cub.png")
-ggsave(kozak_crit2, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/kozak_crit.png")
-# Cubagem x Residuo + Altura
-ggsave(cub_res_alt, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_res_alt.png")
-ggsave(cub_res_alt1, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_res_alt_1,3.png")
-ggsave(cub_res_alt2, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_res_alt_2,3.png")
-ggsave(cub_res_alt3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_res_alt_3,3.png")
-ggsave(cub_res_alt4, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_res_alt_4,3.png")
-ggsave(cub_res_alt5, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_res_alt_5,3.png")
-ggsave(cub_res_alt6, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_res_alt_6,3.png")
-# Cubagem x Criterion + Erro Relativo + Ajuste Linear
-ggsave(cub_crit_er_lm, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_crit_er_lm.png")
-ggsave(cub_crit_er_lm1, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_crit_er_lm_1,3.png")
-ggsave(cub_crit_er_lm2, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_crit_er_lm_2,3.png")
-ggsave(cub_crit_er_lm3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_crit_er_lm_3,3.png")
-ggsave(cub_crit_er_lm4, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_crit_er_lm_4,3.png")
-ggsave(cub_crit_er_lm5, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_crit_er_lm_5,3.png")
-ggsave(cub_crit_er_lm6, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/cub_crit_er_lm_6,3.png")
-#Ajuste utilizando o dap medido pelo criterion
-ggsave(schummacher_cub, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_cub.png")
-ggsave(schummacher_crit, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit.png")
-ggsave(schummacher_crit1, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_1,3.png")
-ggsave(schummacher_crit2, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_2,3.png")
-ggsave(schummacher_crit3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_3,3.png")
-ggsave(schummacher_crit4, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_4,3.png")
-ggsave(schummacher_crit5, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_5,3.png")
-ggsave(schummacher_crit6, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_6,3.png")
-# Ajuste utilizando o dap medido pela cubagem (correto)
-ggsave(schummacher_crit_corr, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_cub.png")
-ggsave(schummacher_crit_corr1, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_cub_1,3.png")
-ggsave(schummacher_crit_corr2, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_cub_2,3.png")
-ggsave(schummacher_crit_corr3, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_cub_3,3.png")
-ggsave(schummacher_crit_corr4, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_cub_4,3.png")
-ggsave(schummacher_crit_corr5, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_cub_5,3.png")
-ggsave(schummacher_crit_corr6, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/schummacher_crit_cub_6,3.png")
+ggsave(cub_res_disp, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_res_alt_all.png")
+ggsave(cub_res_hist, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_res_alt_1_3.png")
+ggsave(schummacher_crit, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_crit_er_lm_all.png")
+ggsave(inv_res_disp_arv, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/cub_crit_er_lm_1_3.png")
+ggsave(inv_hist_vol_arv, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/schummacher_crit_1_3.png")
+ggsave(inv_vol_obs_est_arv, filename = "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Graficos/Graficos_Finais/schummacher_crit_all.png")
 
 # Visualizar os graficos Finais ####
 
-kzk2
 box_arvore
-cub_res_alt_all
-cub_res_alt_1_3
-cub_crit_er_lm_all
-schummacher_crit_corr_all
-schummacher_crit_corr_1_3
+kzk
+cub_res_disp
+cub_res_hist
+schummacher_crit
+inv_res_disp_arv
+inv_hist_vol_arv
+inv_vol_obs_est_arv
 
 
 
