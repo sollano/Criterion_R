@@ -1,4 +1,3 @@
-
 # Carregar Bibliotecas e Funcoes ####
 source("Funcoes.R")
 
