@@ -65,17 +65,16 @@ Comp = 0
 
 
 
-# Teste F de Graybill cubagem ####
+# F de Graybill cubagem ####
 
-vol_cub_graybill <- all_data %>% 
-  #filter(Alternativa %in% c("Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5") ) %>%
+gt_cub_vol <- all_data %>% 
   group_by(Alternativa) %>%
-  do(Gt(.$vol_cubagem,.$vol_criterion)) %>%
-  ungroup(.) %>%
-  do(rbind(all_data %>% 
-             filter(Alternativa == "Alternativa_2") %>% 
-             do(Gt(.$ht_cubagem,.$ht_criterion)) %>% 
-             mutate(Alternativa = "Ht est"),.)) 
+  do(Gt(.$vol_cubagem,.$vol_criterion, id = "cubagem_vol")) 
+            
+gt_cub_ht <- all_data %>% 
+  filter(Alternativa == "Alternativa_2") %>% 
+  do(Gt(.$ht_cubagem,.$ht_criterion, id = "cubagem_ht")) %>% 
+  mutate(Alternativa = "Alternativa 2")             
 
 # Ajuste dos Modelos de Schummacher (Volume) e Kozak (Taper) ####
 
@@ -125,18 +124,28 @@ tab_coef_f <- bind_rows(
 
 dados_inv_raw <- read.csv("dados_mc.csv", sep = ",", dec = ".", header = T) %>% mutate(DAP = CAP / pi, HT = ALT1, ALT1 = NULL,CAP=NULL)
 
-talhoes <- c(3603, 3604, 3605)
-talhoes <- c(3619, 3674, 3914, 4536, 4736)
-talhoes <- c(3603, 3604, 3605, 3608, 3609, 3610, 3611, 3617, 3619)
+#dados_inv_raw <- read_excel("~/Trabalhos_Mensuracao/Proj V&M/Dados_IA/Dados_JPO.xlsx",                  sheet = "IPC") %>% mutate(DAP = CAP / pi, HT = ALT1, ALT1 = NULL,CAP=NULL)
 
+# Podemos utilizar todos os talhoes contidos neste dado
+# ou podemos selecionar talhoes aleatoriamente 
+            
+# Funcao que seleciona niveis de um fator aleatoriamente
+#talhoes <- sample.factor.levels(dados_inv_raw_, "CODTALHAO", 5)
+
+# todos os talhoes
+talhoes <- levels(factor(dados_inv_raw$CODTALHAO))
+
+# Removemos arvores quebras, com ponta seca, etc
 dados_inv_raw_ <- dados_inv_raw %>%
-  filter(DESCCATEGORIA %in% c("Normal", "Dominante") )
+ filter(DESCCATEGORIA %in% c("Normal", "Dominante") )
 
+# Tab de coeficientes
  tab_coef_inv <-  dados_inv_raw_ %>%
-   filter(DESCESPECIE == "CLONE", CODTALHAO %in% talhoes) %>%
-   filter(!is.na(DAP), !is.na(HT) ) %>% # Remover todos os NAs
-   hdjoin(grupos=c("CODTALHAO", "CODPARCELA"), HT = "HT", DAP = "DAP", OBS = "DESCCATEGORIA", dom = "Dominante") %>%
- mutate(LN_HT = log(HT), INV_DAP = 1/DAP, LN_HD = log(HD) ) %>% # variaveis necessarias para reg
+   filter(CODTALHAO %in% talhoes,
+          !is.na(DAP)           ,
+          !is.na(HT)            ) %>%
+   hdjoin(c("CODTALHAO", "CODPARCELA"), "HT",  "DAP", "DESCCATEGORIA", "Dominante") %>%
+   mutate(LN_HT = log(HT), INV_DAP = 1/DAP, LN_HD = log(HD) ) %>% # variaveis necessarias para reg
    group_by(CODTALHAO) %>% # chave
    do(mod = lm(LN_HT ~ INV_DAP + LN_HD, data =.)) %>% # Ajuste do Modelo
    mutate(b0=coef(mod)[1], 
@@ -144,14 +153,12 @@ dados_inv_raw_ <- dados_inv_raw %>%
           b2=coef(mod)[3],
           Rsqr=summary(mod)[[9]],
           Std.Error=summary(mod)[[6]]   ) %>%
-   select(-mod) %>%
-   filter(Rsqr > .60) %>% # Manter apenas equacoes com R2 aceitavel
-   droplevels
+   select(-mod) 
  
- 
+ # calculo da altura estimada utilziando os coeficientes gerados anteriormente
  dados_inv <- dados_inv_raw_ %>% # Definicao do df
-   filter(DESCESPECIE == "CLONE", CODTALHAO %in% talhoes) %>%
-   filter(!is.na(DAP) ) %>% # Remover todos os NAs
+   filter(CODTALHAO %in% talhoes,
+          !is.na(DAP)            ) %>%
    hdjoin(grupos=c("CODTALHAO", "CODPARCELA"), HT = "HT", DAP = "DAP", OBS = "DESCCATEGORIA", dom = "Dominante") %>%
    right_join(tab_coef_inv, by = c("CODTALHAO") ) %>% # uniao com coef da eq de altura
    mutate(HT_EST = ifelse(!is.na(HT), HT, exp(b0 + b1*1/DAP + b2*log(HD) ) ) ) %>% # calculo do HT para arvores nm
@@ -160,58 +167,93 @@ dados_inv_raw_ <- dados_inv_raw %>%
 
 # Calculo de volume para cada alternativa ####
 
-dados_inv1 <- dados_inv %>%
-  sch_vol(tab_coef_f[1, ], name ="Alternativa_1") %>% 
-  sch_vol(tab_coef_f[2, ], name ="Alternativa_2") %>% 
-  sch_vol(tab_coef_f[3, ], name ="Alternativa_3") %>% 
-  sch_vol(tab_coef_f[4, ], name ="Alternativa_4") %>% 
-  sch_vol(tab_coef_f[5, ], name ="Alternativa_5") # %>% head
-
-
-# Calculo do erro ####
+ # Calculo do volume utilizando a tabela de coeficientes de volume gerados anteriormente
+ # e uma funcao customizada, para facilitar o codigo
+dados_inv_arv <- dados_inv %>%
+   sch_vol(tab_coef_f[1, ], name ="Alternativa_1") %>% 
+   sch_vol(tab_coef_f[2, ], name ="Alternativa_2") %>% 
+   sch_vol(tab_coef_f[3, ], name ="Alternativa_3") %>% 
+   sch_vol(tab_coef_f[4, ], name ="Alternativa_4") %>% 
+   sch_vol(tab_coef_f[5, ], name ="Alternativa_5") # %>% head
  
-vol_est <- dados_inv1 %>%
-  select(matches("Alternativa"), HT_EST) %>% 
-  gather("Alternativa", "VOL_EST", -HT_EST, - Alternativa_1) %>% 
-  select(Alternativa,  
-         VOL_OBS = Alternativa_1, 
-         VOL_EST, 
-         HT = HT_EST ) %>%
-  mutate(er = round(((VOL_EST - VOL_OBS)/VOL_OBS)*100, 2) )
 
-levels(vol_est$Alternativa) <- c("Alternativa 2", "Alternativa 3", "Alternativa 4", "Alternativa 5")
+# Calculo do erro em nivel arvore ####
+ 
+vol_est_arv <- dados_inv_arv %>%
+   select(matches("Alternativa"), HT_EST, CODTALHAO, CODPARCELA) %>% 
+   gather("Alternativa", "VOL_EST", -CODTALHAO, -CODPARCELA, - Alternativa_1, -HT_EST ) %>% 
+   select(CODTALHAO, 
+          CODPARCELA,
+          Alternativa,  
+          VOL_OBS = Alternativa_1, 
+          VOL_EST, 
+          HT = HT_EST ) %>%
+   mutate(er = round(((VOL_EST - VOL_OBS)/VOL_OBS)*100, 2) )
 
-# F de graybill do volume estimado ####
+# Calculo do erro em nivel parcela ####
+ 
+ vol_est_parcela <- vol_est_arv                 %>% 
+   group_by(CODTALHAO, CODPARCELA, Alternativa) %>% 
+   summarise(VOL_OBS = sum(VOL_OBS),
+             VOL_EST = sum(VOL_EST),
+             HT = mean(HT)         ,
+             er = mean(er)                     )%>% 
+   arrange(Alternativa)
+ 
+ 
+ 
+ 
+ 
+# Calculo do erro em nivel talhao ####
 
-vol_est_graybill <- vol_est %>%
+vol_est_talhao <- vol_est_arv      %>% 
+  group_by(CODTALHAO, Alternativa) %>% 
+  summarise(VOL_OBS = sum(VOL_OBS),
+            VOL_EST = sum(VOL_EST),
+            HT = mean(HT)         ,
+            er = mean(er)         )%>% 
+  arrange(Alternativa)
+
+
+
+# F de graybill inventario  ####
+
+gt_inv_arv <- vol_est_arv %>%
   group_by(Alternativa) %>%
-  do(Gt(.$VOL_OBS, .$VOL_EST)) 
+  do(Gt(.$VOL_OBS, .$VOL_EST, "inv_vol_arvore")) 
 
+gt_inv_parc <- vol_est_parcela %>%
+  group_by(Alternativa) %>%
+  do(Gt(.$VOL_OBS, .$VOL_EST, "inv_vol_parcela")) 
+ 
+gt_inv_talh <- vol_est_talhao %>%
+  group_by(Alternativa) %>%
+  do(Gt(.$VOL_OBS, .$VOL_EST, "inv_vol_talhao")) 
+ 
 
-tab_graybill <- rbind(vol_cub_graybill, vol_est_graybill)
+tab_graybill <- bind_rows(gt_cub_vol, 
+                      gt_cub_ht, 
+                      gt_inv_arv, 
+                      gt_inv_parc, 
+                      gt_inv_talh) %>% 
+  select(F_H0, F_crit, P_valor, Alpha, Teste, id, Alternativa) %>% 
+  arrange(id, Alternativa)
 
-
+tab_graybill
 
 # exportar tabelas para xlsx ####
 
-#  - Tabelas Finais 
-write.xlsx(vol_cub_graybill, "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Tabelas/Tabelas_Finais/vol_cub_graybill.xlsx")
-write.xlsx(tab_coef_all_crit, "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Tabelas/Tabelas_Finais/tab_coef_all_crit.xlsx")
-write.xlsx(tab_coef_f, "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Tabelas/Tabelas_Finais/tab_coef_all_crit_cor.xlsx")
-write.xlsx(vol_est_graybill, "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Tabelas/Tabelas_Finais/vol_est_graybill.xlsx")
-write.xlsx(tab_graybill, "D:/Documents/Trabalhos_Mensuracao/Projeto_Criterion/Criterion_R/Tabelas/Tabelas_Finais/tab_graybill.xlsx")
+# utlizamos a funcao write.xlsx2 do pacote xlsx;
+# Utilizamos xlsx2 pois a funcao com 2 no final
+# converte os separadores para o padrao do computador (brasileiro);
+# precisamos converter os dados para data frame, pois,
+# o pacote nao lida bem com objetos tbl_df (criados pelo dplyr);
+# utilizamos row.names=F para remover row.names da tabela ao exportar.
 
-# Visualizar as tabelas Finais ####
-
-tab_coef_all_crit
-tab_coef_f
-
-vol_cub_graybill_res
-vol_cub_graybill
-
-vol_est_graybill_res 
-vol_est_graybill
-
-tab_graybill_res
-tab_graybill
+write.xlsx2(as.data.frame(all_data)       , "Tabelas/cub_vol_arvore_alternativas.xlsx", row.names=F)
+write.xlsx2(as.data.frame(tab_coef_f)     , "Tabelas/tab_coef_f.xlsx", row.names=F)
+write.xlsx2(as.data.frame(vol_est_arv)    , "Tabelas/vol_est_arv.xlsx", row.names=F)
+write.xlsx2(as.data.frame(vol_est_parcela), "Tabelas/vol_est_parcela.xlsx", row.names=F)
+write.xlsx2(as.data.frame(vol_est_talhao) , "Tabelas/vol_est_talhao.xlsx", row.names=F)
+write.xlsx2(as.data.frame(tab_graybill)   , "Tabelas/tab_graybill.xlsx", row.names=F)
 
