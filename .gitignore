@@ -24,6 +24,8 @@ marcio.R
 Graphs _old.R
 mostrar_marcio.xlsx
 extra_info.csv
+graficos
+Tabelas
 
 # produced vignettes
 vignettes/*.html
