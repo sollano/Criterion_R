@@ -2,16 +2,16 @@
 # Pacotes ####
 
 library(readxl)
-library(xlsx)
+suppressPackageStartupMessages(library(xlsx))
 library(broom)
 library(purrr)
 library(tidyr)
-library(dplyr)
+suppressPackageStartupMessages(library(dplyr))
 library(grid)
-library(ggplot2)
+suppressPackageStartupMessages(library(ggplot2))
 library(ggthemes)
-library(extrafont)
-library(gridExtra)
+suppressPackageStartupMessages(library(extrafont))
+suppressPackageStartupMessages(library(gridExtra))
 loadfonts(device="win", quiet = T)
 
 

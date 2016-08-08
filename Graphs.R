@@ -32,7 +32,8 @@ box_arvore <- all_data %>%
 
 kzk  <- raw_data %>% 
   mutate(d_sob_dap = dcc/dap, h_sob_ht = secao/ht,
-         metodo = factor(metodo, labels = c("a", "b") )  ) %>% 
+         metodo_ = factor(metodo, labels = c("b", "a") ),
+         metodo = relevel(metodo_,  "a")) %>% 
   ggplot(aes(x=d_sob_dap, y=h_sob_ht)) + 
   geom_point(size = 2, alpha = .4) + 
   labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak") + 
@@ -45,7 +46,7 @@ kzk  <- raw_data %>%
         plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
         axis.title   = element_text(size = 14), 
         axis.text    = element_text(size = 12),
-        strip.text.x = element_text(size = 16))  
+        strip.text.x = element_text(size = 16))
 
 # Cubagem Res Porcentagem Dipersao ####
 
