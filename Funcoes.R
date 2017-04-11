@@ -3,13 +3,10 @@
 
 library(readxl)
 suppressPackageStartupMessages(library(xlsx))
-library(broom)
-library(purrr)
-library(tidyr)
-suppressPackageStartupMessages(library(dplyr))
-library(grid)
-suppressPackageStartupMessages(library(ggplot2))
+library(tidyverse)
 library(ggthemes)
+library(broom)
+library(grid)
 suppressPackageStartupMessages(library(extrafont))
 suppressPackageStartupMessages(library(gridExtra))
 loadfonts(device="win", quiet = T)
@@ -55,8 +52,7 @@ Gt <- function(Y1, Yj, id, alpha = 0.05) {
 
 } 
 
-CubagemComp <- function(Dados, Limite, id = "Criterion_", Comp = 1)
-{
+CubagemComp <- function(Dados, Limite, id = "Criterion_", Comp = 1){
   
   if(!is.null(Dados$Alternativa)){names(Dados)[names(Dados) == "Alternativa" ] <- "metodo"}
   
@@ -110,8 +106,7 @@ CubagemComp <- function(Dados, Limite, id = "Criterion_", Comp = 1)
   return(df)
 }
 
-sch_vol <- function(df, modvol, name) 
-{
+sch_vol <- function(df, modvol, name){
   df %>%
     cbind(modvol)  %>% 
     mutate_(.dots    = 
@@ -119,8 +114,7 @@ sch_vol <- function(df, modvol, name)
     select(-matches("b"),-Rsqr, -Std.Error, -Alternativa )
 }
 
-hdjoin <- function(df, grupos, HT, DAP, OBS, dom, names="HD")
-{
+hdjoin <- function(df, grupos, HT, DAP, OBS, dom, names="HD"){
   suppressPackageStartupMessages(require(dplyr))
   require(lazyeval)
   
@@ -153,8 +147,7 @@ hdjoin <- function(df, grupos, HT, DAP, OBS, dom, names="HD")
   
 }
 
-hd <- function(df, grupos, HT, DAP, OBS, dom, names="HD")
-{
+hd <- function(df, grupos, HT, DAP, OBS, dom, names="HD"){
   suppressPackageStartupMessages(require(dplyr))
   require(lazyeval)
   
@@ -178,8 +171,7 @@ hd <- function(df, grupos, HT, DAP, OBS, dom, names="HD")
     ungroup
 }
 
-sample.factor.levels <- function(df,factor, n, rep = F)
-{
+sample.factor.levels <- function(df,factor, n, rep = F){
   df %>%
     group_by_(factor) %>%
     summarise(a = n()) %>%

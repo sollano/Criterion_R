@@ -3,8 +3,8 @@ source("Funcoes.R")
 
 # Carregar Dados Brutos ####
 
-raw_data <- read.csv("dados_brutos.csv", sep = ";", dec = ",", header = T)
-dados_ht <- read.csv("extra_info.csv"  , sep = ";", dec = ",", header = T)
+raw_data <- read.csv2("dados_brutos.csv")
+dados_ht <- read.csv2("extra_info.csv")
 
 # Calc vol total pelos métodos: Cubagem,criterion, e composto para limites de 1 a 6 ####
 
@@ -163,7 +163,17 @@ dados_inv_raw_ <- dados_inv_raw %>%
    mutate(HT_EST = ifelse(!is.na(HT), HT, exp(b0 + b1*1/DAP + b2*log(HD) ) ) ) %>% # calculo do HT para arvores nm
    select(-b0,-b1,-b2,-Rsqr, -Std.Error) # remocao de variaveis descartaveis
  
-
+# ou
+ dados_inv_teste <- dados_inv_raw_ %>%
+   filter(CODTALHAO %in% talhoes,
+          !is.na(DAP)) %>%
+   hdjoin(c("CODTALHAO", "CODPARCELA"), "HT",  "DAP", "DESCCATEGORIA", "Dominante") %>%
+   mutate(LN_HT = log(HT), INV_DAP = 1/DAP, LN_HD = log(HD) ) %>%
+   group_lm("CODTALHAO", "LN_HT ~ INV_DAP + LN_HD",merge_coef = T) %>% 
+   fit_mod("LN_HT ~ INV_DAP + LN_HD", "HT_EST")
+   
+ 
+ 
 # Calculo de volume para cada alternativa ####
 
  # Calculo do volume utilizando a tabela de coeficientes de volume gerados anteriormente

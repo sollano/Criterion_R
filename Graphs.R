@@ -36,7 +36,9 @@ kzk  <- raw_data %>%
          metodo = relevel(metodo_,  "a")) %>% 
   ggplot(aes(x=d_sob_dap, y=h_sob_ht)) + 
   geom_point(size = 2, alpha = .4) + 
-  labs(x="d/dap", y="h/ht", title="Ajuste do Modelo de Kozak") + 
+  labs(x="d/DAP", 
+       y="h/HT", 
+       title="Ajuste do Modelo de Kozak") + 
   scale_x_continuous(breaks=c(0,.5,  1, 1.5)) + 
   coord_fixed(ratio=3)  + 
   theme_grey(base_family = "Arial Unicode MS" ) + 
@@ -44,7 +46,7 @@ kzk  <- raw_data %>%
   theme_igray(base_family = "Arial Unicode MS") + 
   theme(panel.margin = unit(2, "lines"), 
         plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
-        axis.title   = element_text(size = 14), 
+        axis.title   = element_text(size = 14, face = "italic"), 
         axis.text    = element_text(size = 12),
         strip.text.x = element_text(size = 16))
 
@@ -58,7 +60,7 @@ cub_res_disp <- all_data %>%
   facet_wrap( ~ Alternativa, nrow = 1) + 
   labs(x      = "Volume Alternativa 1 (m³)", 
        y      = "Resíduo (%)"              , 
-       colour = "HT (m)"         ,
+       colour = expression(paste(italic("HT")," ","(m)")) ,
        title  = "Gráfico de Dispersão  dos residuos em relação à Alternativa 1" ) +
   coord_cartesian(ylim = c(-40,40) ) + 
   scale_colour_gradient(low = "ligh tgrey", high = "black") + 
@@ -93,14 +95,15 @@ cub_res_hist <-  all_data %>%
 # Cubagem Vol X VolEST ####
 
 cub_vol_obs_est <-  all_data %>%
-  mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
-  ggplot(aes(vol_cubagem, vol_criterion))  + 
+  #mutate(Alternativa = factor(Alternativa, labels = c("a", "b", "c", "d"))  ) %>% 
+  mutate(Alternativa = forcats::fct_recode(Alternativa, a = "Alternativa_2" ), b = "Alternativa_3", c = "Alternativa_4", "d" = "Alternativa_5"  ) %>% 
+  ggplot(aes(vol_cubagem, vol_criterion)) + 
   geom_point(aes(colour=er), size = 3)  + 
   geom_smooth(method="lm", colour="gray25") + 
   facet_wrap( ~ Alternativa, nrow = 1) + 
   labs(x      = "Volume Alternativa 1 (m³)", 
        y      = "Volume Alternativas  (m³)"     , 
-       colour = "Res (%)"        ,
+       colour = "Res (%)",
        title  = "Gráfico de Dispersão para o Volume Calculado pelas Alternativas 2 a 5 em relacao a 1") + 
   scale_colour_gradient(low = "ligh tgrey", high = "black") + 
   theme_igray(base_family = "Arial Unicode MS") + 
@@ -121,8 +124,8 @@ schummacher_crit <-  all_data %>%
   geom_point(size=4) +
   stat_smooth(method ="lm", color="gray45") + 
  facet_wrap( ~ Alternativa, nrow = 1) + 
-  labs(x     = "Ln(DAP) + Ln(HT)", 
-       y     = "Ln(VCC)", 
+  labs(x     = expression(paste(italic("Ln(DAP)"), "+", italic("Ln(HT)"))), 
+       y     = expression(italic("Ln(VCC)")), 
        title = "Ajuste do Modelo de Schummacher & Hall") + 
   theme_igray(base_family = "Arial Unicode MS") + 
   theme(panel.margin = unit(2, "lines"), 
@@ -143,7 +146,7 @@ inv_res_disp_arv  <-  vol_est_arv %>%
   facet_wrap( ~ Alternativa, nrow = 1)  + 
   labs(x      = "Volume Estimado Alternativa 1 (m³)", 
        y      = "Resíduo (%)", 
-       colour = "HT (m)",
+       colour = expression(paste(italic("HT")," ","(m)")),
        title  = "Dispersão dos Residuos do Volume Estimado das Diferentes Alternativas\n em nivel de Arvore") + 
   coord_cartesian(ylim = c(-40,40)) + 
   scale_colour_gradient(low = "ligh tgrey", high = "black") + 
@@ -208,7 +211,7 @@ inv_res_disp_parc  <-  vol_est_parcela %>%
   facet_wrap( ~ Alternativa, nrow = 1)  + 
   labs(x      = "Volume Estimado Alternativa 1 (m³)", 
        y      = "Resíduo (%)", 
-       colour = "HT (m)",
+       colour = expression(paste(italic("HT")," ","(m)")) ,
        title  = "Dispersão dos Residuos do Volume Estimado das Diferentes Alternativas\n em nivel de Parcela") + 
   coord_cartesian(ylim = c(-40,40)) + 
   scale_colour_gradient(low = "ligh tgrey", high = "black") + 
@@ -273,7 +276,7 @@ inv_res_disp_talh  <-  vol_est_talhao %>%
   facet_wrap( ~ Alternativa, nrow = 1)  + 
   labs(x      = "Volume Estimado Alternativa 1 (m³)", 
        y      = "Resíduo (%)", 
-       colour = "HT (m)",
+       colour = expression(paste(italic("HT")," ","(m)")) ,
        title  = "Dispersão dos Residuos do Volume Estimado das Diferentes Alternativas\n em nivel de Talhao") + 
   coord_cartesian(ylim = c(-40,40)) + 
   scale_colour_gradient(low = "ligh tgrey", high = "black") + 
@@ -318,7 +321,7 @@ inv_vol_obs_est_talh <-  vol_est_talhao %>%
        y      = "Volume Estimado (m³)", 
        colour = "Res (%)", 
        title  = "Gráfico de Dispersão para o Volume Estimado pelas Alternativas 2 a 5 em relacao a 1 \n em nivel de Arvore") + 
-  scale_colour_gradient(low = "ligh tgrey", high = "black") + 
+  scale_colour_gradient(low = "cyan4", high = "deepblue") + 
   theme_igray(base_family = "Arial Unicode MS") + 
   theme(panel.margin = unit(2, "lines"), 
         plot.title   = element_text(size = 16, face="bold", vjust = 0.9), 
@@ -362,7 +365,7 @@ inv_res_disp_grid <- grid.arrange(
     facet_wrap( ~ Alternativa, nrow = 1)  + 
     labs(x = NULL,
          y = NULL,
-         color = "HT (m)",
+         color = expression(paste(italic("HT")," ","(m)")) ,
          title = "B") +
     coord_cartesian(ylim = c(-40,40)) + 
     scale_colour_gradient(low = "ligh tgrey", high = "black") + 
