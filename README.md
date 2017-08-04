@@ -12,6 +12,6 @@ O Objetivo do presente trabalho foi estimar o volume total de árvores com base 
 
 ## Apoio
 
-O trabalho foi desenvolvido no Laboratório de Manejo, DEF, UFVJM.
+O trabalho foi desenvolvido no Laboratório de Manejo Florestal, DEF, UFVJM.
 
 UFVJM, FAPEMIG, CNPq e CAPES.
